@@ -52,6 +52,7 @@ void Result_clear(Result *r) {
 }
 
 void Result_init(Result *r) {
+  Result_clear(r);
   for (int i = 0; i < n; i++) {
     if (rand() % 2 == 1) {
       r->count++;
@@ -85,40 +86,32 @@ void Result_clone(Result *src, Result *dst) {
 
 void solve() {
   Result *r = Result_new();
+  Result_init(r);
   Result *best = Result_new();
-  Result_clear(best);
+  best->sum = 0;
   while (best->sum != max - 1) {
-    printf("reset\n");
-    Result_clear(r);
-    Result_init(r);
-    for (int i = 0; i < 100000; i++) {
-      for (int i = 0; i < 100000 && best->sum != max - 1; i++) {
-        int i;
-        if (r->sum < max) {
-          do {
-            i = rand() % n;
-          } while (Result_has(r, i));
-          r->bytes[i / 8] |= 1 << i % 8;
-          r->sum += numbers[i];
-          r->count += 1;
-        } else {
-          do {
-            i = rand() % n;
-          } while (!Result_has(r, i));
-          r->bytes[i / 8] &= ~(1 << i % 8);
-          r->sum -= numbers[i];
-          r->count -= 1;
-        }
-        if (r->sum > best->sum && r->sum < max) {
-          Result_clone(r, best);
-        }
-      }
+    int i;
+    if (r->sum < max) {
+      do {
+        i = rand() % n;
+      } while (Result_has(r, i));
+      r->bytes[i / 8] |= 1 << i % 8;
+      r->sum += numbers[i];
+      r->count += 1;
+    } else {
+      do {
+        i = rand() % n;
+      } while (!Result_has(r, i));
+      r->bytes[i / 8] &= ~(1 << i % 8);
+      r->sum -= numbers[i];
+      r->count -= 1;
     }
-    Result_clone(best, r);
+    if (r->sum > best->sum && r->sum < max) {
+      Result_clone(r, best);
+    }
   }
   Result_clone(best, r);
   Result_output(best);
-  printf("sum: %d\n", best->sum);
   Result_free(r);
   Result_free(best);
 }
